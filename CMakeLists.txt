@@ -26,3 +26,8 @@ add_executable(obbdec_lcs
                src/obbdec_lcs.cpp
                $<TARGET_OBJECTS:common>
 )
+
+install(FILES
+        src/dictionary.txt
+        DESTINATION bin
+)

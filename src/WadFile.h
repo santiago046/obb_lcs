@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <vector>
 #include "dictionary.h"
+#include <cstddef>
 
 class cWadFile
 {

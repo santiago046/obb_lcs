@@ -1,6 +1,8 @@
 #include "dictionary.h"
 #include "crc32.h"
 #include "utils.h"
+#include <cstddef>
+#include <vector>
 
 dictionary_string dictionary_string::GetName() const
 {

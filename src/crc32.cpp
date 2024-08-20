@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include "crc32.h"
+#include <cstddef>
 
 static const uint32_t crcTable[256] = {
     0x00000000u, 0x77073096u, 0xee0e612cu, 0x990951bau, 0x076dc419u,

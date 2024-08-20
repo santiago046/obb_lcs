@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 
 uint32_t crc32FromUpcaseString(const char* key);
 uint32_t crc32FromLowcaseString(const char* key);

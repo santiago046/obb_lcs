@@ -1,6 +1,8 @@
 #include "WadFile.h"
 #include "crc32.h"
 #include <functional>
+#include <cstddef>
+#include <cstring>
 
 const size_t BLOCK_SIZE = 0x20000; // size of file io buffer
 

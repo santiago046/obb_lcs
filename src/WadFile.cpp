@@ -31,14 +31,14 @@ cWadFile::~cWadFile()
 long long cWadFile::FileTell()
 {
 	if (m_pFile)
-		return _ftelli64(m_pFile);
+		return ftello64(m_pFile);
 	return -1ll;
 }
 
 bool cWadFile::FileSeek(long long pos)
 {
 	if (m_pFile)
-		return _fseeki64(m_pFile, pos, SEEK_SET) == 0;
+		return fseeko64(m_pFile, pos, SEEK_SET) == 0;
 	return false;
 }
 
@@ -124,8 +124,10 @@ void cWadFile::SetNameAtOffset(const char* str, size_t offset)
 		m_names.resize(len + offset);
 
 	char* name = &m_names[offset];
-	if (*name == '\0')
-		strcpy_s(name, len, str);
+	if (*name == '\0') {
+		strncpy(name, str, len);
+		name[len - 1] = '\0'; // Ensure null-termination
+	}
 	else
 	{
 		if (strcmp(name, str))
@@ -180,7 +182,7 @@ std::filesystem::path cWadFile::GetFilePath(const sFileEntry& file) const
 	if (m_names[file.nameOffset] == '\0')
 	{
 		char crc_str[24];
-		sprintf_s(crc_str, "%08X.dat", file.crc32);
+		snprintf(crc_str, sizeof(crc_str), "%08X.dat", file.crc32);
 		return crc_str;
 	}
 	return GetDirPath(file.directoryId) / &m_names[file.nameOffset];
@@ -200,7 +202,7 @@ std::filesystem::path cWadFile::GetDirPath(const sDirEntry& dir) const
 void cWadFile::SaveListOfFilesToTXT(const std::filesystem::path& path) const
 {
 	FILE* txt = nullptr;
-	_wfopen_s(&txt, path.c_str(), L"w");
+	txt = fopen(path.c_str(), "w");
 	if (!txt) return;
 
 	for (const auto& file : m_files)
@@ -218,7 +220,7 @@ void cWadFile::PrintAllFiles() const
 void cWadFile::DumpFiles() const
 {
 	FILE* f = nullptr;
-	fopen_s(&f, "filedump.bin", "wb");
+	f = fopen("filedump.bin", "wb");
 	if (!f) return;
 
 	fwrite(m_files.data(), sizeof(sFileEntry), m_files.size(), f);
@@ -333,7 +335,8 @@ bool cWadFile::Pack(const std::filesystem::path& path)
 		std::filesystem::path infilePath = path / GetFilePath(file);
 
 		FILE* infile = nullptr;
-		_wfopen_s(&infile, infilePath.c_str(), L"rb");
+		infile = fopen(infilePath.c_str(), "rb");
+		//_wfopen_s(&infile, infilePath.c_str(), L"rb");
 		if (!infile)
 		{
 			printf("Couldn't open file %s\n", infilePath.string().c_str());
@@ -342,9 +345,9 @@ bool cWadFile::Pack(const std::filesystem::path& path)
 
 		file.offset = FileTell();
 
-		_fseeki64(infile, 0, SEEK_END);
-		uint64_t size = file.zsize = file.size = _ftelli64(infile);
-		_fseeki64(infile, 0, SEEK_SET);
+		fseeko64(infile, 0, SEEK_END);
+		uint64_t size = file.zsize = file.size = ftello64(infile);
+		fseeko64(infile, 0, SEEK_SET);
 		printf("%s\n", infilePath.lexically_relative(path).string().c_str());
 
 		file.data_crc32 = 0;
@@ -371,8 +374,7 @@ bool cWadFile::Pack(const std::filesystem::path& path)
 	m_bPacked = true;
 
 	// file is packed, make it read only
-	_wfreopen_s(&m_pFile, m_filepath.c_str(), L"rb", m_pFile);
-
+	m_pFile = freopen(m_filepath.c_str(), "rb", m_pFile);
 	return true;
 }
 
@@ -398,7 +400,7 @@ bool cWadFile::ExtractAllFiles(const std::filesystem::path& path)
 		std::filesystem::path filepath = path / GetFilePath(file);
 
 		FILE* outfile = nullptr;
-		_wfopen_s(&outfile, filepath.c_str(), L"wb");
+		outfile = fopen(filepath.c_str(), "wb");
 		if (!outfile)
 		{
 			printf("Couldn't create file %s\n", filepath.string().c_str());
@@ -463,7 +465,7 @@ cWadFile cWadFile::Open(const std::filesystem::path& path)
 {
 	cWadFile wadFile;
 
-	_wfopen_s(&wadFile.m_pFile, path.c_str(), L"rb");
+	wadFile.m_pFile = fopen(path.c_str(), "rb");
 
 	if (wadFile.m_pFile)
 	{
@@ -514,7 +516,7 @@ cWadFile cWadFile::Create(const std::filesystem::path& path, bool isEncrypted)
 {
 	cWadFile wadFile;
 
-	_wfopen_s(&wadFile.m_pFile, path.c_str(), L"wb");
+	wadFile.m_pFile = fopen(path.c_str(), "wb");
 	if (wadFile.m_pFile)
 	{
 		wadFile.m_filepath = path;

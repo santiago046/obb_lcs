@@ -1,6 +1,9 @@
 #include <filesystem>
 #include <vector>
-#include <Windows.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdexcept>
+
 #include "utils.h"
 
 const std::filesystem::path& GetApplicationPath()
@@ -9,27 +12,15 @@ const std::filesystem::path& GetApplicationPath()
 
 	if (path.empty())
 	{
-		std::vector<WCHAR> name(MAX_PATH);
-		DWORD errorCode = 0;
-		do
-		{
-			DWORD result = GetModuleFileName(NULL, name.data(), name.size());
-			errorCode = GetLastError();
-			switch (errorCode)
-			{
-			case ERROR_SUCCESS:
-				path = name.data();
-				path.remove_filename();
-				break;
-			case ERROR_INSUFFICIENT_BUFFER:
-				//printf("ERROR_INSUFFICIENT_BUFFER\n");
-				name.resize(name.size() + MAX_PATH);
-				break;
-			default:
-				printf("GetApplicationPath() unknown error %X\n", errorCode);
-				break;
-			}
-		} while (errorCode == ERROR_INSUFFICIENT_BUFFER);
+		std::vector<char> name(PATH_MAX);
+		ssize_t count = readlink("/proc/self/exe", name.data(), name.size());
+		if (count == -1) {
+			throw std::runtime_error("Failed to get application path");
+		}
+		name[count] = '\0'; // Null-terminate the string
+
+		path = name.data();
+		path.remove_filename();
 	}
 
 	return path;

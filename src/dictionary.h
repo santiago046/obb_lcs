@@ -7,7 +7,10 @@
 class dictionary_string : public std::string
 {
 public:
-	using std::string::string;
+	using std::string::string;  // Inherit constructors
+
+	// Explicit move constructor
+	dictionary_string(std::string&& other) : std::string(std::move(other)) {}
 
 	mutable bool wasUsed = false;
 

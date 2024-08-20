@@ -1,6 +1,6 @@
 #include "WadFile.h"
 
-int wmain(int argc, wchar_t* argv[])
+int main(int argc, char* argv[])
 {
 	printf("obbdec_lcs v2.0 by Serge (aka Sergeanur)\n");
 	if (argc < 2)

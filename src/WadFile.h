@@ -35,7 +35,7 @@ class cWadFile
 		uint64_t _unused = 0;
 
 		// for std::sort
-		bool operator<(sFileEntry& r)
+		bool operator<(const sFileEntry& r) const
 		{
 			return crc32 < r.crc32;
 		}

@@ -33,7 +33,7 @@ dictionary ReadDictionary(std::filesystem::path path)
 	}
 
 	FILE* ftxt = nullptr;
-	_wfopen_s(&ftxt, path.c_str(), L"r");
+	ftxt = fopen(path.c_str(), "r");
 	if (ftxt)
 	{
 		fseek(ftxt, 0, SEEK_END);
@@ -68,7 +68,7 @@ dictionary ReadDictionary(std::filesystem::path path)
 void DumpUsedDictionary(const dictionary& dict, const std::filesystem::path& path)
 {
 	FILE* ftxt = nullptr;
-	_wfopen_s(&ftxt, path.c_str(), L"w");
+	ftxt = fopen(path.c_str(), "w");
 
 	for (const auto& [crc32, str] : dict)
 	{
